@@ -63,7 +63,6 @@ var slasher = (function() {
 						}
 
 						_this.emit('slashed', foundText);
-						//console.log(foundText);
 					} else {
 						_this.emit('requestError');
 					}

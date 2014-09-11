@@ -5,7 +5,7 @@ Retrieve content from an article page by providing its URL.
 
 ## TO DO ##
 1. Optimize performance
-2. Asynchronous process
+2. More asynchronous process
 3. Add more test cases
 4. Memory leak cases
 
