@@ -8,6 +8,8 @@ var slasher = (function() {
 		slashIt: function(url) {
 			request(url, function(error, response, body) {
 				if (!error && response.statusCode == 200) {
+					console.log('URL: ' + url);
+
 					var	bodyStripped = str(body).stripTags('blockquote', 'strong', 'em', 'a', 'ul', 'li', 'ol').s,
 							$ 			  	 = cheerio.load(bodyStripped),
 							$htmlBody;
@@ -17,44 +19,52 @@ var slasher = (function() {
 
 					// console.log($htmlBody.html());
 
-					var children 	 = $htmlBody.children(),
-							childCount = children.length,
-							foundText  = '';
+					var children 	 	= $htmlBody.children(),
+							pChildren  	= $htmlBody.children('p'),
+							pChildCount = pChildren.length,
+							childCount 	= children.length,
+							done 			 	= false,
+							foundText  	= '';
 
-					while(childCount > 0) {
+					while(!done) {
 						var topIdx   	 = 0,
 								textLength = 0;
 
-						for(var i=0; i<childCount; i++) {
-							var content = $(children[i]),
-									text 	 	= content.text().replace(/\s/g, '');
+						if (pChildCount > 0) {
+							for(var i=0; i<pChildCount; i++) {
+								var pChild = $(pChildren[i]);
+								foundText += pChild.text() + '\n';
+							}
 
-							// console.log(text.length);
-							// console.log(text);
-							// console.log(children[i]);
-							// console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-							// console.log('');
+							done = true;
+						} else {
+							for(var i=0; i<childCount; i++) {
+								var content = $(children[i]),
+										text 	 	= content.text().replace(/\s/g, '');
 
-							if (textLength < text.length) {
-								textLength = text.length;
-								topIdx = i;
-							}	
-						}
+								if (textLength < text.length) {
+									textLength = text.length;
+									topIdx = i;
+								}
+							}
 
-						var child = $(children[topIdx]);
+							var child = $(children[topIdx]);
 
-						// console.log(child.text());
-						// console.log('======================================================');
-						// console.log('');
-
-						children = child.children();
-						childCount = child.children().length;
-						if (childCount === 0) {
-							foundText = child.text();
+							children 		= child.children();
+							pChildren 	= child.children('p');
+							pChildCount = pChildren.length;
+							childCount 	= child.children().length;
+							if (childCount === 0) {
+								foundText = child.text();
+								done = true;
+							}
 						}
 					}
 
 					console.log(foundText);
+
+					console.log('============================================================');
+					console.log('');
 
 				} else {
 					return false;

@@ -2,7 +2,9 @@
   "name": "slasherjs",
   "version": "0.0.1",
   "private": false,
-  "scripts": {},
+  "scripts": {
+  	"start": "node app.js"
+  },
   "dependencies": {
     "cheerio": "~0.17.0",
     "request": "~2.42.0",
