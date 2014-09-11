@@ -1,0 +1,11 @@
+{
+  "name": "slasherjs",
+  "version": "0.0.1",
+  "private": false,
+  "scripts": {},
+  "dependencies": {
+    "cheerio": "~0.17.0",
+    "request": "~2.42.0",
+    "string": "~2.0.1"
+  }
+}
