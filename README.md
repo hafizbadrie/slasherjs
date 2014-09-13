@@ -8,7 +8,8 @@ Retrieve content from an article page by providing its URL.
 2. More asynchronous process
 3. Add more test cases
 4. Memory leak cases
-
+5. Measure performance
+6. Write test scripts
 
 ### URL TESTED SUCCESS ###
 1. http://www.thejakartapost.com/news/2014/09/08/jokowi-promises-better-coordination-transition.html
