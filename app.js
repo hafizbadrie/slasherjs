@@ -8,5 +8,6 @@ slash.on('slashed', function(content) {
 });
 
 urls.forEach(function(url, index, array) {
+	console.log(url);
 	slash.slashIt(url);
 });
