@@ -9,6 +9,8 @@ var slasher = (function() {
 		Slash: function() {
 			events.EventEmitter.call(this);
 			this.slasher = function(htmlCode, callback) {
+				var startTime = new Date().getMilliseconds();
+
 				var	bodyStripped = str(htmlCode).stripTags('blockquote', 'strong', 'em', 'a', 'ul', 'li', 'ol').s,
 						$ 			  	 = cheerio.load(bodyStripped),
 						$htmlBody;
@@ -59,6 +61,11 @@ var slasher = (function() {
 								}
 							}
 						}
+
+						var endTime  = new Date().getMilliseconds(),
+								diffTime = endTime - startTime;
+
+						console.log('Elapsed time: ' + diffTime.toString() + ' ms');
 
 						callback('ok', foundText);
 					} catch(ex) {
