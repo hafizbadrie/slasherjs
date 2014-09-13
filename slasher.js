@@ -14,52 +14,56 @@ var slasher = (function() {
 						$htmlBody;
 
 				process.nextTick(function() {
-					$('script, style, iframe, header, footer, noscript, br, img').remove();
-					$htmlBody = $('body');
+					try {
+						$('script, style, iframe, header, footer, noscript, br, img').remove();
+						$htmlBody = $('body');
 
-					var children 	 	= $htmlBody.children(),
-							pChildren  	= $htmlBody.children('p'),
-							pChildCount = pChildren.length,
-							childCount 	= children.length,
-							done 			 	= false,
-							foundText  	= '';
+						var children 	 	= $htmlBody.children(),
+								pChildren  	= $htmlBody.children('p'),
+								pChildCount = pChildren.length,
+								childCount 	= children.length,
+								done 			 	= false,
+								foundText  	= '';
 
-					while(!done) {
-						var topIdx   	 = 0,
-								textLength = 0;
+						while(!done) {
+							var topIdx   	 = 0,
+									textLength = 0;
 
-						if (pChildCount > 0) {
-							for(var i=0; i<pChildCount; i++) {
-								var pChild = $(pChildren[i]);
-								foundText += pChild.text() + '\n';
-							}
+							if (pChildCount > 0) {
+								for(var i=0; i<pChildCount; i++) {
+									var pChild = $(pChildren[i]);
+									foundText += pChild.text() + '\n';
+								}
 
-							done = true;
-						} else {
-							for(var i=0; i<childCount; i++) {
-								var content = $(children[i]),
-										text 	 	= content.text().replace(/\s/g, '');
+								done = true;
+							} else {
+								for(var i=0; i<childCount; i++) {
+									var content = $(children[i]),
+											text 	 	= content.text().replace(/\s/g, '');
 
-								if (textLength < text.length) {
-									textLength = text.length;
-									topIdx = i;
+									if (textLength < text.length) {
+										textLength = text.length;
+										topIdx = i;
+									}
+								}
+
+								var child = $(children[topIdx]);
+
+								children 		= child.children();
+								pChildren 	= child.children('p');
+								pChildCount = pChildren.length;
+								childCount 	= child.children().length;
+								if (childCount === 0) {
+									foundText = child.text();
+									done = true;
 								}
 							}
-
-							var child = $(children[topIdx]);
-
-							children 		= child.children();
-							pChildren 	= child.children('p');
-							pChildCount = pChildren.length;
-							childCount 	= child.children().length;
-							if (childCount === 0) {
-								foundText = child.text();
-								done = true;
-							}
 						}
-					}
 
-					callback(foundText);
+						callback('ok', foundText);
+					} catch(ex) {
+						callback('error', '');
+					}
 				});
 
 			};
@@ -68,8 +72,12 @@ var slasher = (function() {
 				var _this = this;
 				request(url, function(error, response, body) {
 					if (!error && response.statusCode == 200) {
-						_this.slasher(body, function(foundText) {
-							_this.emit('slashed', foundText);
+						_this.slasher(body, function(status, foundText) {
+							if (status === 'ok') {
+								_this.emit('slashed', foundText);
+							} else {
+								_this.emit('error', 'Fail in slashing HTML code');
+							}
 						});
 					} else {
 						_this.emit('requestError');

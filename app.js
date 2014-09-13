@@ -7,6 +7,10 @@ slash.on('slashed', function(content) {
 	console.log(content);
 });
 
+slash.on('error', function(message) {
+	console.log(message);
+});
+
 urls.forEach(function(url, index, array) {
 	console.log(url);
 	slash.slashIt(url);
