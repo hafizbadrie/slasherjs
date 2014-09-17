@@ -13,5 +13,7 @@ slash.on('error', function(message) {
 
 urls.forEach(function(url, index, array) {
 	console.log(url);
-	slash.slashIt(url);
+	slash.addUrl(url);
 });
+
+slash.slashIt();

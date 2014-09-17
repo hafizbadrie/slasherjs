@@ -8,15 +8,27 @@ var slasher = (function() {
 	methods = {
 		Slash: function() {
 			events.EventEmitter.call(this);
-			var contentLib = {},
+			var urlSet 		 = [],
+					contentLib = {},
 					countArr 	 = [];
+
+			this.isEmptyUrlSet = function() {
+				return (urlSet.length === 0);
+			}
+
+			this.addUrl = function(url) {
+				urlSet.push(url);
+			}
+
+			this.pushContent = function(content, contentTrimmed) {
+				var trimmedLength = contentTrimmed.length;
+				countArr.push(trimmedLength);
+				contentLib[trimmedLength] = content;
+			}
 
 			this.recurslash = function($, children) {
 				for(var i=0; i<children.length; i++) {
 					var $child = $(children[i]);
-
-					// console.log($child.text());
-					// console.log('===============================');
 
 					if ($child.children('p').length > 0) {
 						var pChildren = $child.children('p'),
@@ -27,8 +39,8 @@ var slasher = (function() {
 						}
 
 						pTrimmed = pContent.replace(/\s/g, '');
-						countArr.push(pTrimmed.length);
-						contentLib[pTrimmed.length] = pContent;
+
+						this.pushContent(pContent, pTrimmed);
 					} 
 
 					if ($child.children().length > 0) {
@@ -37,8 +49,8 @@ var slasher = (function() {
 						if ($child.text() !== '') {
 							var content = $child.text(),
 									trimmed = content.replace(/\s/g, '');
-							countArr.push(trimmed.length);
-							contentLib[trimmed.length] = content;
+
+							this.pushContent(content, trimmed);
 						}
 					}
 				}
@@ -57,26 +69,15 @@ var slasher = (function() {
 
 				process.nextTick(function() {
 					try {
-						var foundText = '';
-
 						$('script, style, iframe, header, footer, noscript, br, img').remove();
 						$htmlBody = $('body');
 
 						var children 	 	= $htmlBody.children(),
-								childCount 	= children.length,
-								done 			 	= false,
 								foundText  	= '';
 
 						_this.recurslash($, children);
 
-						// console.log(contentLib);
-
-						if (countArr.length > 0) {
-							countArr.sort(function(a, b) {
-								return b - a;
-							});
-							foundText = contentLib[countArr[0]];
-						}
+						foundText = _this.findArticle();
 
 						var endTime  = new Date().getMilliseconds(),
 								diffTime = endTime - startTime;
@@ -91,19 +92,48 @@ var slasher = (function() {
 
 			};
 
-			this.slashIt = function(url) {
+			this.findArticle = function() {
+				var article = '';
+
+				if (countArr.length > 0) {
+					countArr.sort(function(a, b) {
+						return b - a;
+					});
+					article = contentLib[countArr[0]];
+				}
+
+				return article;
+			}
+
+			this.isValidUrl = function(url) {
+				var urlMod = require('url'),
+						parsed = urlMod.parse(url);
+
+				return (parsed.protocol !== null && parsed.slashes !== null && parsed.host !== null && parsed.hostname !== null);
+			}
+
+			this.grabHTML = function(url, callback) {
+				request(url, callback);
+			}
+
+			this.slashIt = function() {
 				var _this = this;
-				request(url, function(error, response, body) {
-					if (!error && response.statusCode == 200) {
-						_this.slasher(body, function(status, foundText) {
-							if (status === 'ok') {
-								_this.emit('slashed', foundText);
+
+				urlSet.forEach(function(url, idx, array) {
+					if (_this.isValidUrl(url)) {
+						_this.grabHTML(url, function(error, response, body) {
+							if (!error && response.statusCode == 200) {
+								_this.slasher(body, function(status, foundText) {
+									if (status === 'ok') {
+										_this.emit('slashed', foundText);
+									} else {
+										_this.emit('error', foundText);
+									}
+								});
 							} else {
-								_this.emit('error', foundText);
+								_this.emit('requestError');
 							}
 						});
-					} else {
-						_this.emit('requestError');
 					}
 				});
 			}
