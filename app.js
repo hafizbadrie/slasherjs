@@ -1,4 +1,4 @@
-var slasher = require('./slasher'),
+var slasher = require('./lib/slasher'),
 		urlList	= require('./urls.json'),
 		urls 		= urlList['url'],
 		slash 	= new slasher.Slash();
