@@ -9,7 +9,6 @@ Currently, you just can provide a URL of an article, slasherjs will do the reque
 1. Add more test cases
 2. Memory leak cases
 3. Measure performance
-4. Write test scripts
 
 ### URL TESTED SUCCESS ###
 1. http://www.thejakartapost.com/news/2014/09/08/jokowi-promises-better-coordination-transition.html
